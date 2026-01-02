@@ -7,7 +7,7 @@ declare_id!("Count3AcZucFDPSFBAeHkQ6AvttieKUkyJ8HiQGhQwe");
 #[program]
 pub mod votingapp {
     use super::*;
-
+    
     pub fn close(_ctx: Context<CloseVotingapp>) -> Result<()> {
         Ok(())
     }
