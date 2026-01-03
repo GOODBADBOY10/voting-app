@@ -52,7 +52,7 @@ pub struct CloseVotingapp<'info> {
 
     #[account(
   mut,
-  close = payer, // close account and return lamports to payer
+  close = payer,
     )]
     pub votingapp: Account<'info, Votingapp>,
 }
