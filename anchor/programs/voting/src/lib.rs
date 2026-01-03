@@ -10,23 +10,28 @@ pub mod voting {
     use super::*;
 
     pub fn initialize_poll(
-        _ctx: Context<InitializePoll>,
-        _poll_id: u64,
+        ctx: Context<InitializePoll>,
+        poll_id: u64,
+        description: String,
+        poll_start: u64,
+        poll_end: u64,
     ) -> Result<()> {
+        let poll = &mut ctx.accounts.poll;
+        poll.poll_id = poll_id;
+        poll.description = description;
+        poll.poll_start = poll_start;
+        poll.poll_end = poll_end;
+        poll.candidate_amount = 0;
         Ok(())
     }
 
-
     // pub fn initialize_candiate() {}
-    
-    
+
     // pub fn initialize_poll() {}
-    
 }
 
 #[derive(Accounts)]
 #[instruction(poll_id: u64)]
-// #[derive(InitSpace)]
 pub struct InitializePoll<'info> {
     #[account(mut)]
     pub signer: Signer<'info>,
@@ -41,7 +46,6 @@ pub struct InitializePoll<'info> {
 
     pub system_program: Program<'info, System>,
 }
-
 
 #[account]
 #[derive(InitSpace)]
