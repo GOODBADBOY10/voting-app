@@ -14,16 +14,16 @@ export type Voting = {
   },
   "instructions": [
     {
-      "name": "initializeCandiate",
+      "name": "initializeCandidate",
       "discriminator": [
-        90,
-        217,
-        66,
-        49,
-        113,
-        119,
-        40,
-        171
+        210,
+        107,
+        118,
+        204,
+        255,
+        97,
+        112,
+        26
       ],
       "accounts": [
         {

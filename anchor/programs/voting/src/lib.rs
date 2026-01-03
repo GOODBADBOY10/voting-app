@@ -25,7 +25,7 @@ pub mod voting {
         Ok(())
     }
 
-    pub fn initialize_candiate(
+    pub fn initialize_candidate(
         ctx: Context<InitializeCandidate>,
         candidate_name: String,
         _pool_id: u64,
@@ -72,7 +72,7 @@ pub struct InitializeCandidate<'info> {
     #[account(
         init,
         payer = signer,
-        space = 8 + Poll::INIT_SPACE,
+        space = 8 + Candidate::INIT_SPACE,
         seeds = [poll_id.to_le_bytes().as_ref(), candidate_name.as_bytes().as_ref()],
         bump,
     )]
