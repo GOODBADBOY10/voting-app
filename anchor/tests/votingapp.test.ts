@@ -11,9 +11,8 @@ const votingAddress = new PublicKey("Count3AcZucFDPSFBAeHkQ6AvttieKUkyJ8HiQGhQwe
 
 describe('voting', () => {
   it('Initialize Poll', async () => {
-    // Use absolute path to anchor directory
     const context = await startAnchor(
-      path.join(__dirname, ".."), 
+      path.join(__dirname, ".."),
       [{ name: "voting", programId: votingAddress }],
       []
     );
@@ -25,16 +24,37 @@ describe('voting', () => {
       provider,
     );
 
+    const pollId = new BN(1);
+
+    // Derive the PDA using ONLY poll_id (no "poll" prefix)
+    const [pollAddress] = PublicKey.findProgramAddressSync(
+      [pollId.toArrayLike(Buffer, "le", 8)],  // Only poll_id, no b"poll"
+      votingProgram.programId
+    );
+
+    console.log("Expected poll address:", pollAddress.toBase58());
+
     await votingProgram.methods
       .initializePoll(
-        new anchor.BN(1),
+        pollId,
         "what is your favorite type of peanut butter",
-        new anchor.BN(0),
-        new anchor.BN(1967442516),
+        new BN(0),
+        new BN(1967442516),
       )
+      .accounts({
+        poll: pollAddress,
+      })
       .rpc();
 
-    console.log("Poll initialized successfully!");
+    const poll = await votingProgram.account.poll.fetch(pollAddress);
+
+    console.log("Poll created:", poll);
+
+    expect(poll.pollId.toString()).toBe(pollId.toString());
+    expect(poll.description).toBe("what is your favorite type of peanut butter");
+    expect(poll.pollStart.toString()).toBe("0");
+    expect(poll.pollEnd.toString()).toBe("1967442516");
+    expect(poll.candidateAmount.toString()).toBe("0");
   });
 });
 
