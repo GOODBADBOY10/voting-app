@@ -10,6 +10,26 @@ const IDL = require("../target/idl/voting.json");
 const votingAddress = new PublicKey("Count3AcZucFDPSFBAeHkQ6AvttieKUkyJ8HiQGhQwe");
 
 describe('voting', () => {
+
+  let context;
+  let provider;
+  let votingProgram;
+
+  beforeAll(async () => {
+    context = await startAnchor(
+      path.join(__dirname, ".."),
+      [{ name: "voting", programId: votingAddress }],
+      []
+    );
+
+    provider = new BankrunProvider(context);
+
+    votingProgram = new Program<Voting>(
+      IDL,
+      provider,
+    );
+  })
+
   it('Initialize Poll', async () => {
     const context = await startAnchor(
       path.join(__dirname, ".."),
@@ -56,6 +76,42 @@ describe('voting', () => {
     expect(poll.pollEnd.toString()).toBe("1967442516");
     expect(poll.candidateAmount.toString()).toBe("0");
   });
+
+  it('initialize candidate', async () => {
+    await votingProgram.methods.initializeCandidate(
+      "smooth",
+      new anchor.BN(1),
+    ).rpc();
+    await votingProgram.methods.initializeCandidate(
+      "cruchy",
+      new anchor.BN(1),
+    ).rpc();
+
+    const [cruchyAddress] = PublicKey.findProgramAddressSync(
+      [new anchor.BN(1).toArrayLike(Buffer, "le", 8)],
+      Buffer.from("cruchy")],
+      votingAddress,
+    );
+
+    const cruchyCandidate = await votingProgram.candidate.fetch(cruchyAddress);
+    console.log(cruchyCandidate);
+    expect(cruchyCandidate.candidateVotes.toNumber()).toEqual(0);
+
+    const [smoothAddress] = PublicKey.findProgramAddressSync(
+      [new anchor.BN(1).toArrayLike(Buffer, "le", 8)],
+      Buffer.from("smooth")],
+      votingAddress,
+    );
+
+    const smoothCandidate = await votingProgram.candidate.fetch(smoothAddress);
+    console.log(smoothCandidate);
+    expect(smoothCandidate.candidateVotes.toNumber()).toEqual(0);
+
+  })
+
+
+  it('vote', async () => { })
+
 });
 
 // import { PublicKey } from "@solana/web3.js";
