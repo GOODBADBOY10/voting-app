@@ -5,6 +5,8 @@ use anchor_lang::prelude::*;
 
 declare_id!("Count3AcZucFDPSFBAeHkQ6AvttieKUkyJ8HiQGhQwe");
 
+pub const ANCHOR_DISCRIMINATOR_SIZE: usize = 8;
+
 #[program]
 pub mod voting {
     use super::*;
@@ -71,7 +73,7 @@ pub struct InitializePoll<'info> {
     #[account(
         init,
         payer = signer,
-        space = 8 + Poll::INIT_SPACE,
+        space = ANCHOR_DISCRIMINATOR_SIZE + Poll::INIT_SPACE,
         seeds = [poll_id.to_le_bytes().as_ref()],
         bump,
     )]
@@ -96,7 +98,7 @@ pub struct InitializeCandidate<'info> {
     #[account(
         init,
         payer = signer,
-        space = 8 + Candidate::INIT_SPACE,
+        space = ANCHOR_DISCRIMINATOR_SIZE + Candidate::INIT_SPACE,
         seeds = [poll_id.to_le_bytes().as_ref(), candidate_name.as_bytes().as_ref()],
         bump,
     )]
@@ -127,7 +129,7 @@ pub struct Vote<'info> {
     #[account(
         init_if_needed,
         payer = signer,
-        space = 8 + VoterRecord::INIT_SPACE,
+        space = ANCHOR_DISCRIMINATOR_SIZE + VoterRecord::INIT_SPACE,
         seeds = [poll_id.to_le_bytes().as_ref(), signer.key().as_ref()],
         bump,
     )]
