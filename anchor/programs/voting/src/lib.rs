@@ -3,7 +3,8 @@
 
 use anchor_lang::prelude::*;
 
-declare_id!("Count3AcZucFDPSFBAeHkQ6AvttieKUkyJ8HiQGhQwe");
+// declare_id!("Count3AcZucFDPSFBAeHkQ6AvttieKUkyJ8HiQGhQwe");
+declare_id!("EwQMN5sS9xrx9ymHixHdWdCatuiiMmtqsyLv8KUHvwai");
 
 pub const ANCHOR_DISCRIMINATOR_SIZE: usize = 8;
 
