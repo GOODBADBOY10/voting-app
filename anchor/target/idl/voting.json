@@ -27,6 +27,7 @@
         },
         {
           "name": "poll",
+          "writable": true,
           "pda": {
             "seeds": [
               {
@@ -63,7 +64,7 @@
           "type": "string"
         },
         {
-          "name": "_pool_id",
+          "name": "_poll_id",
           "type": "u64"
         }
       ]
@@ -121,6 +122,83 @@
           "type": "u64"
         }
       ]
+    },
+    {
+      "name": "vote",
+      "discriminator": [
+        227,
+        110,
+        155,
+        23,
+        136,
+        126,
+        172,
+        25
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "poll",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "arg",
+                "path": "poll_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "candidate",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "arg",
+                "path": "poll_id"
+              },
+              {
+                "kind": "arg",
+                "path": "candidate_name"
+              }
+            ]
+          }
+        },
+        {
+          "name": "voter_record",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "arg",
+                "path": "poll_id"
+              },
+              {
+                "kind": "account",
+                "path": "signer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "_candidate_name",
+          "type": "string"
+        },
+        {
+          "name": "_poll_id",
+          "type": "u64"
+        }
+      ]
     }
   ],
   "accounts": [
@@ -149,6 +227,36 @@
         153,
         111
       ]
+    },
+    {
+      "name": "VoterRecord",
+      "discriminator": [
+        178,
+        96,
+        138,
+        116,
+        143,
+        202,
+        115,
+        33
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "AlreadyVoted",
+      "msg": "You have already voted in this poll"
+    },
+    {
+      "code": 6001,
+      "name": "PollNotStarted",
+      "msg": "Voting has not started yet"
+    },
+    {
+      "code": 6002,
+      "name": "PollEnded",
+      "msg": "Voting has ended"
     }
   ],
   "types": [
@@ -162,7 +270,7 @@
             "type": "string"
           },
           {
-            "name": "candidate_value",
+            "name": "candidate_votes",
             "type": "u64"
           }
         ]
@@ -192,6 +300,18 @@
           {
             "name": "candidate_amount",
             "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "VoterRecord",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "has_voted",
+            "type": "bool"
           }
         ]
       }

@@ -33,6 +33,7 @@ export type Voting = {
         },
         {
           "name": "poll",
+          "writable": true,
           "pda": {
             "seeds": [
               {
@@ -69,7 +70,7 @@ export type Voting = {
           "type": "string"
         },
         {
-          "name": "poolId",
+          "name": "pollId",
           "type": "u64"
         }
       ]
@@ -127,6 +128,83 @@ export type Voting = {
           "type": "u64"
         }
       ]
+    },
+    {
+      "name": "vote",
+      "discriminator": [
+        227,
+        110,
+        155,
+        23,
+        136,
+        126,
+        172,
+        25
+      ],
+      "accounts": [
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "poll",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "arg",
+                "path": "pollId"
+              }
+            ]
+          }
+        },
+        {
+          "name": "candidate",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "arg",
+                "path": "pollId"
+              },
+              {
+                "kind": "arg",
+                "path": "candidateName"
+              }
+            ]
+          }
+        },
+        {
+          "name": "voterRecord",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "arg",
+                "path": "pollId"
+              },
+              {
+                "kind": "account",
+                "path": "signer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "candidateName",
+          "type": "string"
+        },
+        {
+          "name": "pollId",
+          "type": "u64"
+        }
+      ]
     }
   ],
   "accounts": [
@@ -155,6 +233,36 @@ export type Voting = {
         153,
         111
       ]
+    },
+    {
+      "name": "voterRecord",
+      "discriminator": [
+        178,
+        96,
+        138,
+        116,
+        143,
+        202,
+        115,
+        33
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "alreadyVoted",
+      "msg": "You have already voted in this poll"
+    },
+    {
+      "code": 6001,
+      "name": "pollNotStarted",
+      "msg": "Voting has not started yet"
+    },
+    {
+      "code": 6002,
+      "name": "pollEnded",
+      "msg": "Voting has ended"
     }
   ],
   "types": [
@@ -168,7 +276,7 @@ export type Voting = {
             "type": "string"
           },
           {
-            "name": "candidateValue",
+            "name": "candidateVotes",
             "type": "u64"
           }
         ]
@@ -198,6 +306,18 @@ export type Voting = {
           {
             "name": "candidateAmount",
             "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "voterRecord",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "hasVoted",
+            "type": "bool"
           }
         ]
       }

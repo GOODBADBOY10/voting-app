@@ -1,3 +1,127 @@
+// #![allow(clippy::result_large_err)]
+// #![allow(unexpected_cfgs)]
+
+// use anchor_lang::prelude::*;
+
+// declare_id!("Count3AcZucFDPSFBAeHkQ6AvttieKUkyJ8HiQGhQwe");
+
+// #[program]
+// pub mod voting {
+//     use super::*;
+
+//     pub fn initialize_poll(
+//         ctx: Context<InitializePoll>,
+//         poll_id: u64,
+//         description: String,
+//         poll_start: u64,
+//         poll_end: u64,
+//     ) -> Result<()> {
+//         let poll = &mut ctx.accounts.poll;
+//         poll.poll_id = poll_id;
+//         poll.description = description;
+//         poll.poll_start = poll_start;
+//         poll.poll_end = poll_end;
+//         poll.candidate_amount = 0;
+//         Ok(())
+//     }
+
+//     pub fn initialize_candidate(
+//         ctx: Context<InitializeCandidate>,
+//         candidate_name: String,
+//         _pool_id: u64,
+//     ) -> Result<()> {
+//         let candidate = &mut ctx.accounts.candidate;
+//         let poll = &mut ctx.accounts.poll;
+//         poll.candidate_amount += 1;
+//         candidate.candidate_name = candidate_name;
+//         candidate.candidate_votes = 0;
+//         Ok(())
+//     }
+
+//     pub fn vote(ctx: Context<Vote>, _candidate_name: String, _pool_id: u64) -> Result<()> {
+//         let candidate = &mut ctx.accounts.candidate;
+//         candidate.candidate_votes += 1;
+//         Ok(())
+//     }
+// }
+
+// #[derive(Accounts)]
+// #[instruction(poll_id: u64)]
+// pub struct InitializePoll<'info> {
+//     #[account(mut)]
+//     pub signer: Signer<'info>,
+//     #[account(
+//         init,
+//         payer = signer,
+//         space = 8 + Poll::INIT_SPACE,
+//         seeds = [poll_id.to_le_bytes().as_ref()],
+//         bump,
+//     )]
+//     pub poll: Account<'info, Poll>,
+
+//     pub system_program: Program<'info, System>,
+// }
+
+// #[derive(Accounts)]
+// #[instruction(candidate_name: String, poll_id: u64)]
+// pub struct InitializeCandidate<'info> {
+//     #[account(mut)]
+//     pub signer: Signer<'info>,
+
+//     #[account(
+//         seeds = [poll_id.to_le_bytes().as_ref()],
+//         bump,
+//     )]
+//     pub poll: Account<'info, Poll>,
+
+//     #[account(
+//         init,
+//         payer = signer,
+//         space = 8 + Candidate::INIT_SPACE,
+//         seeds = [poll_id.to_le_bytes().as_ref(), candidate_name.as_bytes().as_ref()],
+//         bump,
+//     )]
+//     pub candidate: Account<'info, Candidate>,
+
+//     pub system_program: Program<'info, System>,
+// }
+
+// #[derive(Accounts)]
+// #[instruction(candidate_name: String, poll_id: u64)]
+// pub struct Vote<'info> {
+//     pub signer: Signer<'info>,
+//     #[account(
+//         seeds = [poll_id.to_le_bytes().as_ref()],
+//         bump,
+//     )]
+//     pub poll: Account<'info, Poll>,
+
+//     #[account(
+//         seeds = [poll_id.to_le_bytes().as_ref(), candidate_name.as_bytes().as_ref()],
+//         bump,
+//     )]
+//     pub candidate: Account<'info, Candidate>,
+// }
+
+// #[account]
+// #[derive(InitSpace)]
+// pub struct Candidate {
+//     #[max_len(32)]
+//     pub candidate_name: String,
+//     pub candidate_votes: u64,
+// }
+
+// #[account]
+// #[derive(InitSpace)]
+// pub struct Poll {
+//     pub poll_id: u64,
+//     #[max_len(210)]
+//     pub description: String,
+//     pub poll_start: u64,
+//     pub poll_end: u64,
+//     pub candidate_amount: u64,
+// }
+
 #![allow(clippy::result_large_err)]
 #![allow(unexpected_cfgs)]
 
@@ -28,19 +152,37 @@ pub mod voting {
     pub fn initialize_candidate(
         ctx: Context<InitializeCandidate>,
         candidate_name: String,
-        _pool_id: u64,
+        _poll_id: u64,
     ) -> Result<()> {
         let candidate = &mut ctx.accounts.candidate;
         let poll = &mut ctx.accounts.poll;
+
         poll.candidate_amount += 1;
         candidate.candidate_name = candidate_name;
-        candidate.candidate_value = 0;
+        candidate.candidate_votes = 0;
         Ok(())
     }
 
-    pub fn vote(ctx: Context<Vote>, candidate_name: String, _pool_id: u64) -> Result<()> {
+    pub fn vote(ctx: Context<Vote>, _candidate_name: String, _poll_id: u64) -> Result<()> {
         let candidate = &mut ctx.accounts.candidate;
+        let voter_record = &mut ctx.accounts.voter_record;
+        let poll = &ctx.accounts.poll;
+
+        require!(!voter_record.has_voted, VotingError::AlreadyVoted);
+
+        let clock = Clock::get()?;
+        let current_time = clock.unix_timestamp as u64;
+
+        require!(current_time >= poll.poll_start, VotingError::PollNotStarted);
+
+        require!(current_time <= poll.poll_end, VotingError::PollEnded);
+
+        // Increment vote count
         candidate.candidate_votes += 1;
+
+        // Mark as voted
+        voter_record.has_voted = true;
+
         Ok(())
     }
 }
@@ -50,6 +192,7 @@ pub mod voting {
 pub struct InitializePoll<'info> {
     #[account(mut)]
     pub signer: Signer<'info>,
+
     #[account(
         init,
         payer = signer,
@@ -69,6 +212,7 @@ pub struct InitializeCandidate<'info> {
     pub signer: Signer<'info>,
 
     #[account(
+        mut,
         seeds = [poll_id.to_le_bytes().as_ref()],
         bump,
     )]
@@ -89,7 +233,9 @@ pub struct InitializeCandidate<'info> {
 #[derive(Accounts)]
 #[instruction(candidate_name: String, poll_id: u64)]
 pub struct Vote<'info> {
+    #[account(mut)]
     pub signer: Signer<'info>,
+
     #[account(
         seeds = [poll_id.to_le_bytes().as_ref()],
         bump,
@@ -97,10 +243,22 @@ pub struct Vote<'info> {
     pub poll: Account<'info, Poll>,
 
     #[account(
+        mut,
         seeds = [poll_id.to_le_bytes().as_ref(), candidate_name.as_bytes().as_ref()],
         bump,
     )]
     pub candidate: Account<'info, Candidate>,
+
+    #[account(
+        init_if_needed,
+        payer = signer,
+        space = 8 + VoterRecord::INIT_SPACE,
+        seeds = [poll_id.to_le_bytes().as_ref(), signer.key().as_ref()],
+        bump,
+    )]
+    pub voter_record: Account<'info, VoterRecord>,
+
+    pub system_program: Program<'info, System>,
 }
 
 #[account]
@@ -108,7 +266,7 @@ pub struct Vote<'info> {
 pub struct Candidate {
     #[max_len(32)]
     pub candidate_name: String,
-    pub candidate_value: u64,
+    pub candidate_votes: u64,
 }
 
 #[account]
@@ -120,4 +278,19 @@ pub struct Poll {
     pub poll_start: u64,
     pub poll_end: u64,
     pub candidate_amount: u64,
+}
+
+#[account]
+#[derive(InitSpace)]
+pub struct VoterRecord {
+    pub has_voted: bool,
+}
+#[error_code]
+pub enum VotingError {
+    #[msg("You have already voted in this poll")]
+    AlreadyVoted,
+    #[msg("Voting has not started yet")]
+    PollNotStarted,
+    #[msg("Voting has ended")]
+    PollEnded,
 }
