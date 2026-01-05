@@ -9,6 +9,20 @@ export async function GET(request: Request) {
         title: "Vote for your favorite type of peanut butter",
         description: "vote between cruchy and smooth peanut butter",
         label: "Vote",
+        links: {
+            actions: [
+                {
+                    label: "Vote for crunchy",
+                    href: "/api/vote?candidate=crunchy",
+                    type: "transaction",
+                },
+                {
+                    label: "Vote for crunchy",
+                    href: "/api/vote?candidate=smooth",
+                    type: "transaction",
+                },
+            ]
+        }
     }
     return Response.json(actionMetadata, {
         headers: ACTIONS_CORS_HEADERS
