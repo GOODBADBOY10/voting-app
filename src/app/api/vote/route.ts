@@ -1,4 +1,4 @@
-import { ActionGetResponse } from "@solana/actions";
+import { ActionGetResponse, ACTIONS_CORS_HEADERS } from "@solana/actions";
 
 
 export async function GET(request: Request) {
@@ -8,6 +8,7 @@ export async function GET(request: Request) {
         description: "vote between cruchy and smooth peanut butter",
         label: "Vote",
     }
-    return Response.json(actionMetadata);
-    // return new Response('Hello from API');
+    return Response.json(actionMetadata, {
+        headers: ACTIONS_CORS_HEADERS
+    });
 }
