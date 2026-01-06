@@ -84,11 +84,11 @@ export async function POST(request: Request) {
 //         links: {
 //             actions: [
 //                 {
-//                     label: "Vote for Crunchy 🥜",
+//                     label: "Vote for Crunchy",
 //                     href: "/api/vote?candidate=crunchy",
 //                 },
 //                 {
-//                     label: "Vote for Smooth 🧈",
+//                     label: "Vote for Smooth",
 //                     href: "/api/vote?candidate=smooth",
 //                 },
 //             ]
@@ -192,7 +192,7 @@ export async function POST(request: Request) {
 //         // Return response
 //         const response: ActionPostResponse = {
 //             transaction: base64Transaction,
-//             message: `Vote recorded for ${candidate}! 🎉`,
+//             message: `Vote recorded for ${candidate}!`,
 //         };
 
 //         return Response.json(response, {
