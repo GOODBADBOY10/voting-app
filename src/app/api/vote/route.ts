@@ -33,4 +33,12 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
     const url = new URL(request.url);
     const candidate = url.searchParams.get("candidate");
+
+    if (candidate != "crunchy" && candidate != "smooth") {
+        return new Response("Invalid Credentials", {
+            status: 400,
+            headers: ACTIONS_CORS_HEADERS
+        });
+    }
+    const connection = new Connection("https://127.0.0.1:8000", "confrimed");
 }
