@@ -43,5 +43,14 @@ export async function POST(request: Request) {
     const connection = new Connection("https://127.0.0.1:8000", "confirmed");
     
     const body: ActionPostRequest = await request.json();
-    const voter = new PublicKey(body.account);
+    let voter;
+
+    try {
+        voter = new PublickKey(body.account);
+    } catch (error) {
+        return new Response("Invalid account", {
+            status: 400,
+            headers: ACTIONS_CORS_HEADERS
+        });
+    }
 }
