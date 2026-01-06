@@ -1,4 +1,4 @@
-import { ActionGetResponse, ACTIONS_CORS_HEADERS } from "@solana/actions";
+import { ActionGetResponse, ActionPostRequest, ACTIONS_CORS_HEADERS } from "@solana/actions";
 
 
 export const OPTIONS = GET;
@@ -41,4 +41,7 @@ export async function POST(request: Request) {
         });
     }
     const connection = new Connection("https://127.0.0.1:8000", "confirmed");
+    
+    const body: ActionPostRequest = await request.json();
+    const voter = new PublicKey(body.account);
 }
