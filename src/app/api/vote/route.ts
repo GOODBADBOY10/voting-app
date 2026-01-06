@@ -28,3 +28,6 @@ export async function GET(request: Request) {
         headers: ACTIONS_CORS_HEADERS
     });
 }
+
+
+export async function POST(request: Request) {}
