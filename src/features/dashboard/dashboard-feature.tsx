@@ -2,7 +2,7 @@ export default function DashboardFeature() {
   return (
     <>
       <div>
-        <p>Home Page of the Voting App</p>
+        <p className="text-red-700">Home Page of the Voting App</p>
       </div>
     </>
   )
