@@ -40,5 +40,5 @@ export async function POST(request: Request) {
             headers: ACTIONS_CORS_HEADERS
         });
     }
-    const connection = new Connection("https://127.0.0.1:8000", "confrimed");
+    const connection = new Connection("https://127.0.0.1:8000", "confirmed");
 }
