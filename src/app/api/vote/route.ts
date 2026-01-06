@@ -46,7 +46,7 @@ export async function POST(request: Request) {
     let voter;
 
     try {
-        voter = new PublickKey(body.account);
+        voter = new PublicKey(body.account);
     } catch (error) {
         return new Response("Invalid account", {
             status: 400,
